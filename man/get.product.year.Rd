@@ -17,6 +17,3 @@ data.frame
 Use the extracted years from get.year.from.title and
 get.year.from.product.section to construct a card year column
 }
-\examples{
-dt.example.year <- get.product.year(dt.example.year)
-}

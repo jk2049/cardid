@@ -24,7 +24,3 @@ columns with identified years. Product section information is commonly used
 in marketplaces such as eBay. Sellers of items may or may not fill in this
 information.
 }
-\examples{
-dt.example.year <- rbindlist(apply(dt.example.year, 1, get.year.from.product.section,
-product.section.year.col.name = "product_section_year"), fill=TRUE)
-}

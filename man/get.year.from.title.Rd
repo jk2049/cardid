@@ -19,7 +19,3 @@ Use a card's title to extract the year that it refers to
 Returns a data frame consisting of the (1) input card title, (2) a set of
 columns with identified years
 }
-\examples{
-dt.example.year <- suppressWarnings(rbindlist(apply(dt.example.year, 1, get.year.from.title,
-card.title.col.name = "card_title"), fill=TRUE))
-}

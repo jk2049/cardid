@@ -14,13 +14,6 @@
 #'
 #' @return data.frame
 #' @export
-#' @examples
-#' dt.example.basketball.names <- data.table::rbindlist(
-#' apply(dt.example.basketball.names, 1, get.player,
-#' card.title.col.name = "card_title", sport = "basketball"), fill=TRUE)
-#' dt.example.baseball.names <- data.table::rbindlist(
-#' apply(dt.example.baseball.names, 1, get.player,
-#' card.title.col.name = "card_title", sport = "baseball"), fill=TRUE)
 get.player <- function(dt.input, card.title.col.name = "card_title", sport){
 
   card.title.index <- which(names(dt.input) == card.title.col.name)

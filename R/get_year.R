@@ -4,19 +4,14 @@
 #' Returns a data frame consisting of the (1) input card title, (2) a set of
 #' columns with identified years
 #'
-#' @import dplyr
 #' @import stringr
 #' @import data.table
-#' @import plyr
 #'
 #' @param dt.input data.frame
 #' @param card.title.col.name character
 #'
 #' @return data.frame
 #' @export
-#' @examples
-#' dt.example.year <- suppressWarnings(rbindlist(apply(dt.example.year, 1, get.year.from.title,
-#' card.title.col.name = "card_title"), fill=TRUE))
 get.year.from.title <- function(dt.input, card.title.col.name = "card_title"){
 
   card.title.index <- which(names(dt.input) == card.title.col.name)
@@ -172,9 +167,6 @@ get.year.from.title <- function(dt.input, card.title.col.name = "card_title"){
 #'
 #' @return data.frame
 #' @export
-#' @examples
-#' dt.example.year <- rbindlist(apply(dt.example.year, 1, get.year.from.product.section,
-#' product.section.year.col.name = "product_section_year"), fill=TRUE)
 get.year.from.product.section <- function(dt.input, product.section.year.col.name = "product_section_year"){
 
   prod.sect.year.index <- which(names(dt.input) == product.section.year.col.name)
@@ -229,8 +221,6 @@ get.year.from.product.section <- function(dt.input, product.section.year.col.nam
 #'
 #' @return data.frame
 #' @export
-#' @examples
-#' dt.example.year <- get.product.year(dt.example.year)
 get.product.year <- function(dt.input){
 
   dt.input[, product_id_year := ifelse(!is.na(four_digit_year), four_digit_year,
