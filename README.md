@@ -40,8 +40,43 @@ library(cardid)
 ## basic example code
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+The package offers three datasets. The first is a dataset with
+information about all the player who have played in the MLB:
+
+``` r
+head(baseball.players)
+#>          player   sports from   to active hall_of_famer original_player
+#> 1 david aardsma baseball 2004 2015      0             0   david aardsma
+#> 2   henry aaron baseball 1954 1976      0             1     henry aaron
+#> 3  tommie aaron baseball 1962 1971      0             0    tommie aaron
+#> 4      don aase baseball 1977 1990      0             0        don aase
+#> 5     andy abad baseball 2001 2006      0             0       andy abad
+#> 6 fernando abad baseball 2010 2019      1             0   fernando abad
+```
+
+The second is a dataset with information about all the player who have
+played in the NBA:
+
+``` r
+head(basketball.players)
+#>               player     sports from   to active hall_of_famer
+#> 1     alaa abdelnaby basketball 1991 1995      0             0
+#> 2     zaid abdulaziz basketball 1969 1978      0             0
+#> 3 kareem abduljabbar basketball 1970 1989      0             1
+#> 4  mahmoud abdulrauf basketball 1991 2001      0             0
+#> 5   tariq abdulwahad basketball 1998 2003      0             0
+#> 6 shareef abdurrahim basketball 1997 2008      0             0
+#>       original_player
+#> 1      alaa abdelnaby
+#> 2     zaid abdul-aziz
+#> 3 kareem abdul-jabbar
+#> 4  mahmoud abdul-rauf
+#> 5   tariq abdul-wahad
+#> 6 shareef abdur-rahim
+```
+
+The third is a subset of a dataset that contains information about
+sports trading cards that were listed on eBay:
 
 ``` r
 head(baseball.players)
@@ -94,11 +129,8 @@ dt.example.titles <- dt.example[, list(sports, card_title)]
 dt.example.basketball.titles <- dt.example.titles[sports == "Basketball", ]
 dt.example.baseball.titles <- dt.example.titles[sports == "Baseball", ]
 dt.example.years <- dt.example[, list(sports, card_title, product_section_year)]
-rm(dt.collectibles.ebay, dt.example, dt.example.titles)
-#> Warning in rm(dt.collectibles.ebay, dt.example, dt.example.titles): object
-#> 'dt.collectibles.ebay' not found
-#> Warning in rm(dt.collectibles.ebay, dt.example, dt.example.titles): object
-#> 'dt.example' not found
+rm(dt.example, dt.example.titles)
+#> Warning in rm(dt.example, dt.example.titles): object 'dt.example' not found
 ```
 
 You’ll still need to render `README.Rmd` regularly, to keep `README.md`
