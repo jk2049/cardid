@@ -6,7 +6,6 @@
 #' @import data.table
 #'
 #' @param dt.input data.frame
-#' @param card.title.col.name character
 #' @param sport character
 #'
 #' @export

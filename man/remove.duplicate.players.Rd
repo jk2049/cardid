@@ -12,8 +12,6 @@ remove.duplicate.players(dt.input, sport)
 \item{dt.input}{data.frame}
 
 \item{sport}{character}
-
-\item{card.title.col.name}{character}
 }
 \description{
 For some entries the previous functions have identified identical player
