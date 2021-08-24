@@ -18,7 +18,10 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of cardid is to ...
+The goal of cardid is to allow you to use the information of basketball and 
+    baseball sports trading cards in order to find the (1) player and (2) year
+    that each card refers to. In addition, it allows the creation of a card 
+    identifier.
 
 ## Installation
 
@@ -36,7 +39,10 @@ devtools::install_github("jk2049/cardid")
 ```
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Below you can find an example of the functionalities offered. Please keep in 
+mind that this is an early version. As a result, the results of this code have 
+only been tested when running the functions in the same order as in the below 
+example:
 
 ```{r example}
 library(cardid)
@@ -46,7 +52,15 @@ library(cardid)
 What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
 ```{r cars}
-summary(cars)
+head(baseball.players)
+head(basketball.players)
+head(dt.example)
+
+dt.example.titles <- dt.example[, list(sports, card_title)]
+dt.example.basketball.titles <- dt.example.titles[sports == "Basketball", ]
+dt.example.baseball.titles <- dt.example.titles[sports == "Baseball", ]
+dt.example.years <- dt.example[, list(sports, card_title, product_section_year)]
+rm(dt.collectibles.ebay, dt.example, dt.example.titles)
 ```
 
 You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/master/examples>.
