@@ -10,29 +10,102 @@
 #' @param sport character
 #'
 #' @export
-get.player <- function(dt.input, card.title.col.name = "card_title", sport){
+remove.duplicate.players <- function(dt.input, sport){
 
-  card.title.index <- which(names(dt.input) == card.title.col.name)
+  # Subset data to specific sport
+  dt.input$sports <- tolower(dt.input$sports)
+  dt.input <- dt.input[sports == sport, ]
 
   if(sport == "basketball"){
-    players.in.title <- basketball.players[str_detect(dt.input[card.title.index], basketball.players$player),
-                                           "original_player"]
+    all.players <- dt.basketball.players$player
+    ## Keep duplicate entries
+    all.players.duplicates <- all.players[duplicated(all.players)]
   }else if(sport == "baseball"){
-    players.in.title <- baseball.players[str_detect(dt.input[card.title.index], baseball.players$player),
-                                         "original_player"]
+    all.players <- dt.baseball.players$player
+    ## Keep duplicate entries
+    all.players.duplicates <- all.players[duplicated(all.players)]
+    all.players.duplicates <- c(all.players.duplicates,
+                                all.players[grepl("jr\\.", all.players)])
   }else{
     stop(paste("Sport ", sport, " is not supported."))
   }
-  n.players <- length(players.in.title)
-  players.in.title <- paste(players.in.title, sep = ",")
+  rm(all.players)
 
-  if(length(players.in.title) == 0) players.in.title <- NA
+  i.limit <- as.numeric(max(dt.input$n_players)) + 3
 
-  dt.output <- c(dt.input, "n_players" = n.players,
-                 players.in.title)
-  dt.output <- as.data.frame(t(dt.output))
+  # all.players.duplicates <- "lamelo ball"
+  # table(dt.input$flag, exclude = NULL)
 
-  return(dt.output)
+  dt.input$flag <- 0
+  dt.input$sports <- tolower(dt.input$sports)
+
+
+  for(i in 4:i.limit){
+    col.player.name <- paste0("V", i)
+    dt.input[get(col.player.name) %in% all.players.duplicates, flag := 1]
+    rm(col.player.name)
+  }
+  indices <- which(dt.input$flag == 1)
+
+  # Fix columns
+  # Some V columns have the same players
+  for(i in 1:length(indices)){
+
+    # print(paste0("Loop 1 - ", sport, " ", i, " out of ", length(indices)))
+
+    card.info <- dt.input[indices[i], ]
+
+    # Get all the players and insert them into a vector
+    players.in.title <- c()
+    for(j in 4:i.limit){
+      col.player.name <- paste0("V", j)
+      players.in.title <- append(players.in.title, card.info[, get(col.player.name)])
+      rm(col.player.name)
+    }
+    # Remove the NAs
+    players.in.title <- players.in.title[!is.na(players.in.title)]
+    # Get the number of duplicate players
+    n.duplicated.player.in.title <- sum(duplicated(players.in.title))
+    # Get the duplicate players
+    duplicated.player.in.title <- players.in.title[duplicated(players.in.title)]
+
+    # For every duplicate player in the vector
+    j <- 1
+    # Insert all the players into a new vector
+    insert.players.in.title <- players.in.title
+    while(j <= length(duplicated.player.in.title)){
+
+      # Find the index of all the entries of that player
+      duplicated.player.in.title.index <- which(players.in.title == duplicated.player.in.title[j])
+      # Remove the first index (we want to keep the first - i.e. one - entry)
+      duplicated.player.in.title.index <- duplicated.player.in.title.index[-1]
+      # Replace the duplicate indices with NA
+      insert.players.in.title[duplicated.player.in.title.index] <- NA
+
+      rm(duplicated.player.in.title.index)
+      j <- j + 1
+    }
+    # Remove the NAs
+    insert.players.in.title <- insert.players.in.title[!is.na(insert.players.in.title)]
+
+    # Change n_players
+    dt.input[indices[i], n_players := as.numeric(length(insert.players.in.title))]
+
+    # Lengthen the new vector so that it has i.limit elements (corresponding to V4-Vi.limit)
+    insert.players.in.title <- c(insert.players.in.title,
+                                 rep(NA, i.limit-length(insert.players.in.title)))
+    # Insert the new elements into the current columns
+    for(z in 1:i.limit){
+      col.player.name <- paste0("V", z+3)
+      dt.input[indices[i], (col.player.name) := insert.players.in.title[z]]
+      rm(col.player.name)
+    }
+
+    rm(card.info, players.in.title,
+       n.duplicated.player.in.title, duplicated.player.in.title,
+       j, z, insert.players.in.title)
+  }
+  return(dt.input)
 }
 
 #' There's an issue with some names that contain "jr." for the baseball cards
@@ -60,7 +133,7 @@ fix.names <- function(dt.input, sport){
 
     for(i in 1:length(indices)){
 
-      print(paste0("Loop 2 - sport ", sport, " ", i, " out of ", length(indices)))
+      # print(paste0("Loop 2 - sport ", sport, " ", i, " out of ", length(indices)))
 
       card.info <- dt.input[indices[i], ]
 
@@ -167,7 +240,7 @@ player.tie.break <- function(dt.input, sport){
 
   for(i in 1:length(indices)){
 
-    print(paste0("Loop 2 - ", sport, " player ", i, " out of ", length(indices)))
+    # print(paste0("Loop 3 - ", sport, " player ", i, " out of ", length(indices)))
 
     card.info <- dt.input[indices[i], ]
     card.title <- card.info[, card_title_2]
