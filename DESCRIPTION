@@ -1,16 +1,23 @@
 Package: cardid
-Title: What the Package Does (One Line, Title Case)
+Title: Use Sports Card Information to Create Card Identifiers
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "jk2049 - Anonymous due to academic submission",
+           family = "jk2049 - Anonymous due to academic submission",
            role = c("aut", "cre"),
            email = "first.last@example.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Description: This package allows you to use the information of basketball and 
+    baseball sports trading cards in order to find the (1) player and (2) year
+    that each card refers to. In addition, it allows the creation of a card 
+    identifier.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Imports: 
+    data.table,
+    dplyr,
+    plyr,
+    stringr
