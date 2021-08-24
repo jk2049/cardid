@@ -75,11 +75,9 @@ dt.example.years <- dt.example[, list(sports, card_title, product_section_year)]
 
 ### Card Title Pre-Processing
 ```{r cardtitlepreprocessing}
-
 dt.example.basketball.titles$card_title <- data.preprocess(dt.example.basketball.titles$card_title)
 dt.example.baseball.titles$card_title <- data.preprocess(dt.example.baseball.titles$card_title)
 dt.example.years$card_title_2 <- data.preprocess(dt.example.years$card_title)
-
 ```
 
 In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
