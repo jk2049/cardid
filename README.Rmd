@@ -101,3 +101,43 @@ dt.example.baseball.titles$card_title <- data.preprocess(dt.example.baseball.tit
 dt.example.years$card_title_2 <- data.preprocess(dt.example.years$card_title)
 ```
 
+### Get Card Player
+
+Then, we use the function ''get.player'' to find the player(s) that each card
+title refers to. 
+
+```{r getplayer}
+get.player <- function(dt.input, card.title.col.name = "card_title", sport){
+
+  card.title.index <- which(names(dt.input) == card.title.col.name)
+
+  if(sport == "basketball"){
+    head(basketball.players)
+
+    players.in.title <- basketball.players[str_detect(dt.input[card.title.index], basketball.players$player),
+                                           "original_player"]
+  }else if(sport == "baseball"){
+    players.in.title <- baseball.players[str_detect(dt.input[card.title.index], baseball.players$player),
+                                         "original_player"]
+  }else{
+    stop(paste("Sport ", sport, " is not supported."))
+  }
+  n.players <- length(players.in.title)
+  players.in.title <- paste(players.in.title, sep = ",")
+
+  if(length(players.in.title) == 0) players.in.title <- NA
+
+  dt.output <- c(dt.input, "n_players" = n.players,
+                 players.in.title)
+  dt.output <- as.data.frame(t(dt.output))
+
+  return(dt.output)
+}
+
+
+dt.example.basketball.titles <- rbindlist(apply(dt.example.basketball.titles, 1, get.player,
+                                                card.title.col.name = "card_title", sport = "basketball"), fill=TRUE)
+dt.example.baseball.titles <- rbindlist(apply(dt.example.baseball.titles, 1, get.player,
+                                              card.title.col.name = "card_title", sport = "baseball"), fill=TRUE)
+```
+
