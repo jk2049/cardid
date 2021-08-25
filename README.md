@@ -25,6 +25,7 @@ And the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
+install.packages("remotes")
 devtools::install_github("jk2049/cardid")
 ```
 
