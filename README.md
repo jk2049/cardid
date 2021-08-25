@@ -147,9 +147,21 @@ the MLB and the NBA players respectively. Standard NLP actions are taken
 (i.e., remove stopwords etc.) that allow us to build a dictionary of
 player names. This is important as the same player names (e.g.,
 shaquille o’neal) can be written in different ways in the card titles
-(e.g., shaquille o’neal, shaquille o neal, shaquille oneal etc.)
+(e.g., shaquille o’neal, shaquille o neal, shaquille oneal etc.).
 
 ``` r
 baseball.players <- baseball.preprocess(dt.baseball.players)
 basketball.players <- basketball.preprocess(dt.basketball.players)
+```
+
+### Card Title Pre-Processing
+
+Second, we use the function ‘’data.preprocess’’ on the card title
+columns in order to manipulate the card titles (i.e., remove stopwords
+etc.)
+
+``` r
+dt.example.basketball.titles$card_title <- data.preprocess(dt.example.basketball.titles$card_title)
+dt.example.baseball.titles$card_title <- data.preprocess(dt.example.baseball.titles$card_title)
+dt.example.years$card_title_2 <- data.preprocess(dt.example.years$card_title)
 ```
