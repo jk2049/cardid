@@ -643,7 +643,7 @@ card year, while in the fifth column (''product_id'') we see the product id. In
 the sixth column we can find whether the product id is valid (''valid'' equals 
 1). A product id is valid only if (1) a year has been identified for this card
 and (2) exactly one player name has been identified for this same card. In the 
-columns that follow we can find the date that the identified player started 
+columns that follow we can find the year that the identified player started 
 (''from'') and stopped (''to'') playing in the MLB/NBA, as well as whether the
 identified player is currently active in the MLB/NBA (''active'' equals 1) and 
 whether the player has been inducted to the hall of fame (''hall of famer'' 
@@ -653,10 +653,7 @@ equals 1).
 dt.example.valid.hof <- dt.example.valid.hof[, list(card_title, n_players, V4, 
                                  product_id_year, product_id, 
                                  valid, from, to, active, hall_of_famer)]
-head(dt.example.valid.hof)
-
-```
-
-table(dt.example.valid.hof$valid)
 head(dt.example.valid.hof[valid == 1, ])
 head(dt.example.valid.hof[valid == 0, ])
+
+```

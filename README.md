@@ -570,7 +570,7 @@ see the product id. In the sixth column we can find whether the product
 id is valid (’‘valid’’ equals 1). A product id is valid only if (1) a
 year has been identified for this card and (2) exactly one player name
 has been identified for this same card. In the columns that follow we
-can find the date that the identified player started (‘’from’‘) and
+can find the year that the identified player started (‘’from’‘) and
 stopped (’‘to’‘) playing in the MLB/NBA, as well as whether the
 identified player is currently active in the MLB/NBA (’‘active’’ equals
 1) and whether the player has been inducted to the hall of fame (‘’hall
@@ -580,7 +580,29 @@ of famer’’ equals 1).
 dt.example.valid.hof <- dt.example.valid.hof[, list(card_title, n_players, V4, 
                                  product_id_year, product_id, 
                                  valid, from, to, active, hall_of_famer)]
-head(dt.example.valid.hof)
+head(dt.example.valid.hof[valid == 1, ])
+#>                                                                          card_title
+#> 1: #10  AARON  JUDGE  2019 PANINI CHROMICLES  titan  hyper   PSA 9  YANKEES  94/299
+#> 2:     1 OF 1 2020 Panini Chroniclies Aaron Judge Contenders Optic Gold Vinyl PSA 9
+#> 3:  (1)  PGA 10  GRADED  2018  AARON JUDGE  DONRUSS  STAT LINE BASEBALL CARD #d/402
+#> 4:                      03 Diamond Kings HOF Heroes Reprints Hawaii Al Kaline /50  
+#> 5: 01 Topps Finest Albert Pujols MLB RC ROOKIE ON CARD AUTO 2001 ST LOUIS CARDINALS
+#> 6:     10-2008 Topps Moments and Milestones All Black Albert Pujols  /25 & /150 NM 
+#>    n_players            V4 product_id_year         product_id valid from   to
+#> 1:         1   aaron judge            2019   aaron judge-2019     1 2016 2021
+#> 2:         1   aaron judge            2020   aaron judge-2020     1 2016 2021
+#> 3:         1   aaron judge            2018   aaron judge-2018     1 2016 2021
+#> 4:         1     al kaline            2003     al kaline-2003     1 1953 1974
+#> 5:         1 albert pujols            2001 albert pujols-2001     1 2001 2021
+#> 6:         1 albert pujols            2008 albert pujols-2008     1 2001 2021
+#>    active hall_of_famer
+#> 1:      1             0
+#> 2:      1             0
+#> 3:      1             0
+#> 4:      0             1
+#> 5:      1             0
+#> 6:      1             0
+head(dt.example.valid.hof[valid == 0, ])
 #>                                                                          card_title
 #> 1:          #1 Registry 1983 Topps Baseball Complete Set  & #2 1981 Topps Registry 
 #> 2:  **1.19 ea - you pick - MANY STARS!! -1969 1970 1971 1972 Topps baseball set lot
@@ -603,6 +625,3 @@ head(dt.example.valid.hof)
 #> 5:            NA
 #> 6:            NA
 ```
-
-table(dt.example.valid.hof$valid) head(dt.example.valid.hof\[valid == 1,
-\]) head(dt.example.valid.hof\[valid == 0, \])
