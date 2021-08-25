@@ -252,7 +252,7 @@ remove.duplicate.players <- function(dt.input, sport){
   # Some V columns have the same players
   for(i in 1:length(indices)){
 
-    print(paste0("Loop 1 - ", sport, " ", i, " out of ", length(indices)))
+    # print(paste0("Loop 1 - ", sport, " ", i, " out of ", length(indices)))
 
     card.info <- dt.input[indices[i], ]
 
@@ -324,7 +324,7 @@ fix.names <- function(dt.input, sport){
 
     for(i in 1:length(indices)){
 
-      print(paste0("Loop 2 - sport ", sport, " ", i, " out of ", length(indices)))
+      # print(paste0("Loop 2 - sport ", sport, " ", i, " out of ", length(indices)))
 
       card.info <- dt.input[indices[i], ]
 
@@ -419,7 +419,7 @@ player.tie.break <- function(dt.input, sport){
 
   for(i in 1:length(indices)){
 
-    print(paste0("Loop 3 - ", sport, " player ", i, " out of ", length(indices)))
+    # print(paste0("Loop 3 - ", sport, " player ", i, " out of ", length(indices)))
 
     card.info <- dt.input[indices[i], ]
     card.title <- card.info[, card_title_2]
