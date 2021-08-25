@@ -106,7 +106,7 @@ dt.example.years$card_title_2 <- data.preprocess(dt.example.years$card_title)
 Then, we use the function ''get.player'' to find the player(s) that each card
 title refers to. 
 
-```{r getplayer}
+```{r echo=FALSE, results='hide',message=FALSE}
 get.player <- function(dt.input, card.title.col.name = "card_title", sport){
 
   card.title.index <- which(names(dt.input) == card.title.col.name)
@@ -134,7 +134,9 @@ get.player <- function(dt.input, card.title.col.name = "card_title", sport){
   return(dt.output)
 }
 
+```
 
+```{r getplayer}
 dt.example.basketball.titles <- rbindlist(apply(dt.example.basketball.titles, 1, get.player,
                                                 card.title.col.name = "card_title", sport = "basketball"), fill=TRUE)
 dt.example.baseball.titles <- rbindlist(apply(dt.example.baseball.titles, 1, get.player,
