@@ -173,7 +173,6 @@ get.year.from.product.section <- function(dt.input, product.section.year.col.nam
 
   prod.sect.year.index <- which(names(dt.input) == product.section.year.col.name)
 
-  # years.1.index <- grepl(".*(\\d{4}).*", dt.collectibles.ebay[1, product_section_year])
   years.1.index <- grepl(".*(\\d{4}).*", dt.input[prod.sect.year.index])
 
   years.1 <- ifelse(years.1.index == TRUE, unlist(str_extract_all(dt.input[prod.sect.year.index], "\\d{4}")), NA)
@@ -188,17 +187,7 @@ get.year.from.product.section <- function(dt.input, product.section.year.col.nam
     four_digit_product_section_year_count <- length(years.1)
   }
 
-  # year <- ifelse(years.1.index == FALSE, unlist(str_extract_all(dt.collectibles.ebay[2, product_section_year], "\\d{2}")), NA)
   years.2 <- ifelse(years.1.index == FALSE, unlist(str_extract_all(dt.input[prod.sect.year.index], "\\d{2}")), NA)
-  # sub('.*(\\d{2}).*', '\\1', dt.collectibles.ebay$product_section_year),
-  # NA)
-  # years.1 <- unlist(str_extract_all(dt.input[card.title.index], "'\\d{2}"))
-  # years.1 <- gsub("'", "", years.1)
-  # years.2 <- unlist(str_extract_all(dt.input[card.title.index], "\\d{2}-\\d{2}"))
-  # years.2 <- substr(years.2, 1, 2)
-  # years.3 <- unlist(str_extract_all(dt.input[card.title.index], "\\d{2}/\\d{2}"))
-  # years.3 <- substr(years.3, 1, 2)
-  # years <- c(years.1, years.2, years.3)
   years.2 <- years.2[!duplicated(years.2)]
 
   if(is.na(years.2) || (length(years.2) == 0)){

@@ -554,3 +554,55 @@ head(dt.example.valid.hof)
 #> 5:     0 <NA> <NA>     NA            NA
 #> 6:     0 <NA> <NA>     NA            NA
 ```
+
+### Data Inspection
+
+Let’s inspect the important columns of our produced dataset. The first
+column (‘’card\_title’‘) shows the original card title. The second
+(’‘n\_players’‘) shows the number of players that were identified
+using our dictionary, while the third (’‘V4’‘) shows the first player
+name that was identified by our dictionary. If there is more than one
+identified player, then each following name is inserted into
+columns’‘V5’‘,’‘V6’‘, etc. (these columns are not displayed here
+to save space). In the fourth column (’‘product\_id\_year’‘) we can find
+the identified card year, while in the fifth column (’‘product\_id’‘) we
+see the product id. In the sixth column we can find whether the product
+id is valid (’‘valid’’ equals 1). A product id is valid only if (1) a
+year has been identified for this card and (2) exactly one player name
+has been identified for this same card. In the columns that follow we
+can find the date that the identified player started (‘’from’‘) and
+stopped (’‘to’‘) playing in the MLB/NBA, as well as whether the
+identified player is currently active in the MLB/NBA (’‘active’’ equals
+1) and whether the player has been inducted to the hall of fame (‘’hall
+of famer’’ equals 1).
+
+``` r
+dt.example.valid.hof <- dt.example.valid.hof[, list(card_title, n_players, V4, 
+                                 product_id_year, product_id, 
+                                 valid, from, to, active, hall_of_famer)]
+head(dt.example.valid.hof)
+#>                                                                          card_title
+#> 1:          #1 Registry 1983 Topps Baseball Complete Set  & #2 1981 Topps Registry 
+#> 2:  **1.19 ea - you pick - MANY STARS!! -1969 1970 1971 1972 Topps baseball set lot
+#> 3: *0243 Thomas Szapucki 2017 Bowman Chrome Prospect Purple Refractor AUTO RC PSA 9
+#> 4:     *0621 Joe Rizzo 2016 Bowman Chrome Draft Autograph AUTO Rookie RC BGS 9.5/10
+#> 5:                  00 Pacific Private Stock Griffey Artists Canvas PSA 10 Gem Mint
+#> 6:                                 00 Topps Allegiance  BGS 9.5 Raw Review Gem Mint
+#>    n_players   V4 product_id_year product_id valid from   to active
+#> 1:         0 <NA>            1983       <NA>     0 <NA> <NA>     NA
+#> 2:         0 <NA>            1969       <NA>     0 <NA> <NA>     NA
+#> 3:         0 <NA>            2017       <NA>     0 <NA> <NA>     NA
+#> 4:         0 <NA>            2016       <NA>     0 <NA> <NA>     NA
+#> 5:         0 <NA>            2000       <NA>     0 <NA> <NA>     NA
+#> 6:         0 <NA>            2000       <NA>     0 <NA> <NA>     NA
+#>    hall_of_famer
+#> 1:            NA
+#> 2:            NA
+#> 3:            NA
+#> 4:            NA
+#> 5:            NA
+#> 6:            NA
+```
+
+table(dt.example.valid.hof$valid) head(dt.example.valid.hof\[valid == 1,
+\]) head(dt.example.valid.hof\[valid == 0, \])

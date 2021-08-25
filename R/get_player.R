@@ -19,8 +19,6 @@ get.player <- function(dt.input, card.title.col.name = "card_title", sport){
   card.title.index <- which(names(dt.input) == card.title.col.name)
 
   if(sport == "basketball"){
-    head(basketball.players)
-
     players.in.title <- basketball.players[str_detect(dt.input[card.title.index], basketball.players$player),
                                            "original_player"]
   }else if(sport == "baseball"){

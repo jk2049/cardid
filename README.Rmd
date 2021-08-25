@@ -112,8 +112,6 @@ get.player <- function(dt.input, card.title.col.name = "card_title", sport){
   card.title.index <- which(names(dt.input) == card.title.col.name)
 
   if(sport == "basketball"){
-    head(basketball.players)
-
     players.in.title <- basketball.players[str_detect(dt.input[card.title.index], basketball.players$player),
                                            "original_player"]
   }else if(sport == "baseball"){
@@ -568,6 +566,11 @@ dataset.
 ```{r echo=FALSE, results='hide',message=FALSE}
 add.player.info <- function(dt.input){
 
+  # dt.input <- dt.example.valid[1347, ]
+
+  baseball.players.keep <- baseball.players
+  basketball.players.keep <- basketball.players
+
   baseball.players$player <- baseball.players$original_player
   baseball.players$original_player <- NULL
   baseball.players <- baseball.players[!duplicated(baseball.players), ]
@@ -627,3 +630,33 @@ dt.example.valid.hof <- add.player.info(dt.example.valid)
 head(dt.example.valid.hof)
 ```
 
+### Data Inspection 
+
+Let's inspect the important columns of our produced dataset. The first column 
+(''card_title'') shows the original card title. The second (''n_players'') shows
+the number of players that were identified using our dictionary, while the third 
+(''V4'') shows the first player name that was identified by our dictionary. If
+there is more than one identified player, then each following name is inserted
+into columns ''V5'', ''V6'', etc. (these columns are not displayed here to save
+space). In the fourth column (''product_id_year'') we can find the identified 
+card year, while in the fifth column (''product_id'') we see the product id. In 
+the sixth column we can find whether the product id is valid (''valid'' equals 
+1). A product id is valid only if (1) a year has been identified for this card
+and (2) exactly one player name has been identified for this same card. In the 
+columns that follow we can find the date that the identified player started 
+(''from'') and stopped (''to'') playing in the MLB/NBA, as well as whether the
+identified player is currently active in the MLB/NBA (''active'' equals 1) and 
+whether the player has been inducted to the hall of fame (''hall of famer'' 
+equals 1).
+
+```{r datainspection}
+dt.example.valid.hof <- dt.example.valid.hof[, list(card_title, n_players, V4, 
+                                 product_id_year, product_id, 
+                                 valid, from, to, active, hall_of_famer)]
+head(dt.example.valid.hof)
+
+```
+
+table(dt.example.valid.hof$valid)
+head(dt.example.valid.hof[valid == 1, ])
+head(dt.example.valid.hof[valid == 0, ])

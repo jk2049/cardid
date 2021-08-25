@@ -45,6 +45,11 @@ drop.useless.columns <- function(dt.input){
 #' @export
 add.player.info <- function(dt.input){
 
+  # dt.input <- dt.example.valid[1347, ]
+
+  baseball.players.keep <- baseball.players
+  basketball.players.keep <- basketball.players
+
   baseball.players$player <- baseball.players$original_player
   baseball.players$original_player <- NULL
   baseball.players <- baseball.players[!duplicated(baseball.players), ]
