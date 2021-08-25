@@ -137,9 +137,493 @@ get.player <- function(dt.input, card.title.col.name = "card_title", sport){
 ```
 
 ```{r getplayer}
-dt.example.basketball.titles <- rbindlist(apply(dt.example.basketball.titles, 1, get.player,
-                                                card.title.col.name = "card_title", sport = "basketball"), fill=TRUE)
-dt.example.baseball.titles <- rbindlist(apply(dt.example.baseball.titles, 1, get.player,
-                                              card.title.col.name = "card_title", sport = "baseball"), fill=TRUE)
+dt.example.basketball.titles <- rbindlist(
+  apply(dt.example.basketball.titles, 1, get.player, 
+        card.title.col.name = "card_title", sport = "basketball"), fill=TRUE)
+dt.example.baseball.titles <- rbindlist(
+  apply(dt.example.baseball.titles, 1, get.player, 
+        card.title.col.name = "card_title", sport = "baseball"), fill=TRUE)
+```
+
+### Get Card Year
+
+The next step is to identify the year that each card refers to. We can identify
+the card year with at most two ways: One is by analyzing the card title through
+the function ''get.year.from.title'', while the other is to analyze the 
+information contained in the product section field of the listed cards through 
+the function ''get.year.from.product.section''. The product section field may 
+or may not have been filled in by the seller. 
+
+Once we are done, we use ''get.product.year'' to construct the card year column.
+
+```{r getyear}
+# Year from the card title
+dt.example.years <- suppressWarnings(rbindlist(apply(dt.example.years, 1, get.year.from.title,
+                                                     card.title.col.name = "card_title"), fill=TRUE))
+
+# Year from the product section information
+dt.example.years <- rbindlist(apply(dt.example.years, 1, get.year.from.product.section,
+                                    product.section.year.col.name = "product_section_year"), fill=TRUE)
+
+# Combine the two
+dt.example.years <- get.product.year(dt.example.years)
+```
+
+### Get Product ID 
+
+Now that we have the identified player and year of every card, we can construct
+the product identifier. If there is no identified player or no identified year
+for a card, then that we insert a missing value (i.e., <NA>) in that card's 
+product id column.
+
+```{r getproductid}
+dt.example.names <- rbind.fill(dt.example.baseball.titles, dt.example.basketball.titles)
+rm(dt.example.baseball.titles, dt.example.basketball.titles)
+
+dt.example.names <- as.data.table(dt.example.names)
+dt.example.names <- dt.example.names[!duplicated(dt.example.names)]
+
+dt.example <- merge(dt.example.years, dt.example.names,
+                    by.x = c("sports", "card_title_2"),
+                    by.y = c("sports", "card_title"), all.x = TRUE)
+
+dt.example[, product_id := paste0(V4, "-", product_id_year)]
+# If any component is NA then replace the ID with NA
+dt.example[is.na(V4), product_id := NA]
+dt.example[is.na(product_id_year), product_id := NA]
+```
+
+### Get Valid Product ID
+
+Although we have constructed a product identifier, there are still some
+pending issues that can only be discovered upon closer inspection of the data:
+  <ol>
+  <li> For some entries the previous functions have identified identical player
+names that have been inserted in separate columns. By using 
+''remove.duplicate.players'' we can remove the duplicates and only keeps
+the unique names</li>
+  <li> There's an issue with some names that contain "jr.". This issue is only 
+present for the baseball cards. We address this issue using ''fix.names''. </li>
+<li> In some cases the identified player names can refer to players who were 
+active during different periods in time (e.g., Bob Smith for baseball). We 
+address this issue by using ''player.tie.break''. This function utilizes the 
+identified card year and pinpoints which specific player each card refers to. </li>
+<li> We have constructed a product id for any cards for which we have identified
+at least one player and a year. The product id however should only be valid 
+for those cards for which exactly one player has been identified. The function
+''flag.id.valid'' flags these observations. </li>
+</ol>
+
+
+```{r echo=FALSE, results='hide',message=FALSE}
+remove.duplicate.players <- function(dt.input, sport){
+
+  # Subset data to specific sport
+  dt.input$sports <- tolower(dt.input$sports)
+  dt.input <- dt.input[sports == sport, ]
+
+  if(sport == "basketball"){
+    all.players <- basketball.players$original_player
+    ## Keep duplicate entries
+    all.players.duplicates <- all.players[duplicated(all.players)]
+  }else if(sport == "baseball"){
+    all.players <- baseball.players$original_player
+    ## Keep duplicate entries
+    all.players.duplicates <- all.players[duplicated(all.players)]
+    all.players.duplicates <- c(all.players.duplicates,
+                                all.players[grepl("jr\\.", all.players)])
+  }else{
+    stop(paste("Sport ", sport, " is not supported."))
+  }
+  rm(all.players)
+
+  i.limit <- as.numeric(max(dt.input$n_players)) + 3
+
+  dt.input$flag <- 0
+  dt.input$sports <- tolower(dt.input$sports)
+
+
+  for(i in 4:i.limit){
+    col.player.name <- paste0("V", i)
+    dt.input[get(col.player.name) %in% all.players.duplicates, flag := 1]
+    rm(col.player.name)
+  }
+  indices <- which(dt.input$flag == 1)
+
+  # Fix columns
+  # Some V columns have the same players
+  for(i in 1:length(indices)){
+
+    print(paste0("Loop 1 - ", sport, " ", i, " out of ", length(indices)))
+
+    card.info <- dt.input[indices[i], ]
+
+    # Get all the players and insert them into a vector
+    players.in.title <- c()
+    for(j in 4:i.limit){
+      col.player.name <- paste0("V", j)
+      players.in.title <- append(players.in.title, card.info[, get(col.player.name)])
+      rm(col.player.name)
+    }
+    # Remove the NAs
+    players.in.title <- players.in.title[!is.na(players.in.title)]
+    # Get the number of duplicate players
+    n.duplicated.player.in.title <- sum(duplicated(players.in.title))
+    # Get the duplicate players
+    duplicated.player.in.title <- players.in.title[duplicated(players.in.title)]
+
+    # For every duplicate player in the vector
+    j <- 1
+    # Insert all the players into a new vector
+    insert.players.in.title <- players.in.title
+    while(j <= length(duplicated.player.in.title)){
+
+      # Find the index of all the entries of that player
+      duplicated.player.in.title.index <- which(players.in.title == duplicated.player.in.title[j])
+      # Remove the first index (we want to keep the first - i.e. one - entry)
+      duplicated.player.in.title.index <- duplicated.player.in.title.index[-1]
+      # Replace the duplicate indices with NA
+      insert.players.in.title[duplicated.player.in.title.index] <- NA
+
+      rm(duplicated.player.in.title.index)
+      j <- j + 1
+    }
+    # Remove the NAs
+    insert.players.in.title <- insert.players.in.title[!is.na(insert.players.in.title)]
+
+    # Change n_players
+    dt.input[indices[i], n_players := as.numeric(length(insert.players.in.title))]
+
+    # Lengthen the new vector so that it has i.limit elements (corresponding to V4-Vi.limit)
+    insert.players.in.title <- c(insert.players.in.title,
+                                 rep(NA, i.limit-length(insert.players.in.title)))
+    # Insert the new elements into the current columns
+    for(z in 1:i.limit){
+      col.player.name <- paste0("V", z+3)
+      dt.input[indices[i], (col.player.name) := insert.players.in.title[z]]
+      rm(col.player.name)
+    }
+
+    rm(card.info, players.in.title,
+       n.duplicated.player.in.title, duplicated.player.in.title,
+       j, z, insert.players.in.title)
+  }
+  return(dt.input)
+}
+
+fix.names <- function(dt.input, sport){
+  if(sport == "baseball"){
+    dt.input <- dt.input[sports == sport, ]
+
+    i.limit <- as.numeric(max(dt.input$n_players)) + 3
+    dt.input$flag <- 0
+    for(i in 4:i.limit){
+      col.player.name <- paste0("V", i)
+      dt.input[grepl(" jr\\.", get(col.player.name)), flag := 1]
+      rm(col.player.name)
+    }
+    indices <- which(dt.input$flag == 1)
+
+    for(i in 1:length(indices)){
+
+      print(paste0("Loop 2 - sport ", sport, " ", i, " out of ", length(indices)))
+
+      card.info <- dt.input[indices[i], ]
+
+      # Get all the players and insert them into a vector
+      players.in.title <- c()
+      for(j in 4:i.limit){
+        col.player.name <- paste0("V", j)
+        players.in.title <- append(players.in.title, card.info[, get(col.player.name)])
+        rm(col.player.name)
+      }
+      # Remove the jr. part
+      players.in.title.jr.removed <- gsub(" jr\\.", "", players.in.title)
+      # Remove the NAs
+      players.in.title <- players.in.title[!is.na(players.in.title)]
+      players.in.title.jr.removed <- players.in.title.jr.removed[!is.na(players.in.title.jr.removed)]
+      # Get the number of duplicate players
+      n.duplicated.player.in.title <- sum(duplicated(players.in.title.jr.removed))
+      # Get the duplicate players
+      duplicated.player.in.title <- players.in.title.jr.removed[duplicated(players.in.title.jr.removed)]
+
+      # For every duplicate player in the vector
+      j <- 1
+      # Insert all the players into a new vector
+      insert.players.in.title <- players.in.title
+      while(j <= length(duplicated.player.in.title)){
+
+        # Find the index of all the entries of that player
+        duplicated.player.in.title.index <- which(grepl(duplicated.player.in.title[j], players.in.title))
+        # Remove the first index (we want to keep the first - i.e. one - entry)
+        duplicated.player.in.title.index <- duplicated.player.in.title.index[-2]
+        # Replace the duplicate indices with NA
+        insert.players.in.title[duplicated.player.in.title.index] <- NA
+
+        rm(duplicated.player.in.title.index)
+        j <- j + 1
+      }
+      # Remove the NAs
+      insert.players.in.title <- insert.players.in.title[!is.na(insert.players.in.title)]
+
+      # Change n_players
+      dt.input[indices[i], n_players := as.numeric(length(insert.players.in.title))]
+
+      # Lengthen the new vector so that it has 8 elements (corresponding to V4-V11)
+      insert.players.in.title <- c(insert.players.in.title,
+                                   rep(NA, 8-length(insert.players.in.title)))
+      # Insert the new elements into the current columns
+      for(z in 1:i.limit){
+        col.player.name <- paste0("V", z+3)
+        dt.input[indices[i], (col.player.name) := insert.players.in.title[z]]
+        rm(col.player.name)
+      }
+
+      rm(card.info, players.in.title,
+         n.duplicated.player.in.title, duplicated.player.in.title,
+         j, insert.players.in.title, z)
+    }
+    dt.input[, flag := NULL]
+    return(dt.input)
+
+  }else{
+    stop(paste("This function is not valid for sport ", sport, ". It's only valid for baseball."))
+  }
+}
+
+player.tie.break <- function(dt.input, sport){
+
+  if(sport == "basketball"){
+    all.players <- dt.basketball.players$player
+  }else if(sport == "baseball"){
+    all.players <- dt.baseball.players$player
+  }else{
+    stop(paste("Sport ", sport, " is not supported."))
+  }
+  all.players.duplicates <- all.players[duplicated(all.players)]
+  if(sport == "basketball"){
+    all.players <- dt.basketball.players
+  }else if(sport == "baseball"){
+    # Reconstruct flag
+    dt.input$flag <- 0
+    i.limit <- as.numeric(max(dt.input$n_players)) + 3
+    for(i in 4:i.limit){
+      col.player.name <- paste0("V", i)
+      dt.input[get(col.player.name) %in% all.players.duplicates, flag := 1]
+      rm(col.player.name)
+    }
+    rm(i, i.limit)
+
+    all.players <- dt.baseball.players
+  }
+
+  indices <- which(dt.input$flag == 1)
+
+  for(i in 1:length(indices)){
+
+    print(paste0("Loop 3 - ", sport, " player ", i, " out of ", length(indices)))
+
+    card.info <- dt.input[indices[i], ]
+    card.title <- card.info[, card_title_2]
+
+    # Get all the players and insert them into a vector
+    players.in.title <- c()
+    col.names <- c()
+    i.limit <- as.numeric(max(dt.input$n_players)) + 3
+    for(j in 4:i.limit){
+      col.player.name <- paste0("V", j)
+      col.names <- append(col.names, col.player.name)
+      players.in.title <- append(players.in.title, card.info[, get(col.player.name)])
+      rm(col.player.name)
+    }
+
+    # Keep only the names that are in the names of the duplicated vector
+    players.in.title <- players.in.title[players.in.title %in% all.players.duplicates]
+
+    players.in.title.count <- 1
+    while(players.in.title.count <= length(players.in.title)){
+      # Get active years for every player
+      player.active.year <- all.players[player == players.in.title[players.in.title.count], list(player, from, to)]
+      # Compare with card title year
+      player.active.year[, potential := ((as.numeric(from)-1) <= as.numeric(card.info[, product_id_year]) &
+                                           as.numeric(to) >= as.numeric(card.info[, product_id_year]))]
+
+      player.count <- sum(player.active.year$potential == TRUE)
+      player.index <- which(player.active.year$potential == TRUE)
+      if(!is.na(player.count) & player.count == 1){
+        # One player fits
+        player.name <- player.active.year[potential == TRUE, player]
+        new.player.name <- paste0(player.name, "-", player.index)
+      }else if(!is.na(player.count) & player.count == 0){
+        # No players fit
+        player.name <- player.active.year[1, player]
+        new.player.name <- paste0(player.name, "-no-fit")
+      }else if(!is.na(player.count) & player.count > 1){
+        # All players fit
+        player.name <- player.active.year[1, player]
+        new.player.name <- paste0(player.name, "-all-fit")
+      }else if(is.na(player.count)){
+        # All players fit
+        player.name <- player.active.year[1, player]
+        new.player.name <- paste0(player.name, "-NA")
+      }
+      rm(player.active.year, player.count, player.index)
+
+      pot.cols <- card.info[, col.names, with = FALSE]
+      col.ind <- which(pot.cols == player.name)
+      rm(pot.cols, player.name)
+
+      col.player.name <- paste0("V", col.ind+3)
+      dt.input[indices[i], (col.player.name) := new.player.name]
+      rm(new.player.name, col.ind, col.player.name)
+
+      players.in.title.count <- players.in.title.count + 1
+    }
+    rm(card.info, card.title, players.in.title, players.in.title.count)
+    rm(col.names)
+  }
+  dt.input$flag <- NULL
+  return(dt.input)
+}
+
+flag.id.valid <- function(dt.input){
+  # Flag valid
+  dt.input[, valid := 0]
+  dt.input[n_players == 1 &
+             !grepl("-no-fit", V4) & !grepl("-all-fit", V4) & !grepl("-NA", V4) &
+             !grepl("-no-fit", V5) & !grepl("-all-fit", V5) & !grepl("-NA", V5) &
+             !grepl("-no-fit", V6) & !grepl("-all-fit", V6) & !grepl("-NA", V6) &
+             !grepl("-no-fit", V7) & !grepl("-all-fit", V7) & !grepl("-NA", V7) &
+             !grepl("-no-fit", V8) & !grepl("-all-fit", V8) & !grepl("-NA", V8) &
+             !grepl("-no-fit", V9) & !grepl("-all-fit", V9) & !grepl("-NA", V9), valid := 1]
+  dt.input[is.na(product_id_year), valid := 0]
+
+  return(dt.input)
+}
+
+```
+
+```{r getvalidproductid}
+dt.example.5.1.1 <- remove.duplicate.players(dt.example, "basketball")
+dt.example.5.1.2 <- remove.duplicate.players(dt.example, "baseball")
+
+dt.example.5.2.2 <- fix.names(dt.example.5.1.2, "baseball")
+
+dt.example.5.3.1 <- player.tie.break(dt.example.5.1.1, "basketball")
+dt.example.5.3.2 <- player.tie.break(dt.example.5.2.2, "baseball")
+
+dt.example.5 <- rbind.fill(dt.example.5.3.1, dt.example.5.3.2)
+dt.example.5 <- as.data.table(dt.example.5)
+
+dt.example.valid <- flag.id.valid(dt.example.5)
+```
+
+### Drop Columns
+
+Using the function ''drop.useless.columns'' we can drop some columns that are
+no longer needed. 
+
+```{r echo=FALSE, results='hide',message=FALSE}
+drop.useless.columns <- function(dt.input){
+
+  # Columns that are not needed any longer are dropped
+  dt.input$four_digit_year <- NULL
+  dt.input$four_digit_year_count <- NULL
+  dt.input$two_digit_year <- NULL
+  dt.input$two_digit_year_count <- NULL
+  dt.input$two_to_four_digit_year <- NULL
+  dt.input$four_digit_product_section_year <- NULL
+  dt.input$four_digit_product_section_year_count <- NULL
+  dt.input$two_digit_product_section_year <- NULL
+  dt.input$two_digit_product_section_year_count <- NULL
+  dt.input$two_to_four_digit_product_section_year <- NULL
+
+  # Also drop the V columns that are empty
+  for(i in 4:11){
+    col.player.name <- paste0("V", i)
+    if(col.player.name %in% colnames(dt.input)){
+      if(sum(is.na(dt.input[, get(col.player.name)])) == nrow(dt.input)){
+        dt.input[, (col.player.name) := NULL]
+      }
+      rm(col.player.name)
+    }
+  }
+  return(dt.input)
+}
+
+```
+
+```{r dropcolumns}
+colnames(dt.example.valid)
+dt.example.valid <- drop.useless.columns(dt.example.valid)
+colnames(dt.example.valid)
+```
+
+### Get Additional Player Information
+
+Our initial sports player datasets contain information that we have not 
+included. Using the function ''add.player.info'' we add this information to our
+dataset.
+
+```{r echo=FALSE, results='hide',message=FALSE}
+add.player.info <- function(dt.input){
+
+  baseball.players$player <- baseball.players$original_player
+  baseball.players$original_player <- NULL
+  baseball.players <- baseball.players[!duplicated(baseball.players), ]
+  basketball.players$player <- basketball.players$original_player
+  basketball.players$original_player <- NULL
+  basketball.players <- basketball.players[!duplicated(basketball.players), ]
+  dt.baseball.players <- as.data.table(baseball.players)
+  dt.basketball.players <- as.data.table(basketball.players)
+  dt.basketball.players[, player := tolower(player)]
+  dt.baseball.players[, player := tolower(player)]
+
+  # # Find how many times each name appears
+  dt.basketball.players[, n := .N, by = player]
+  dt.baseball.players[, n := .N, by = player]
+
+  # # Create an index for the names
+  dt.basketball.players[, index := 1:.N, by = player]
+  dt.baseball.players[, index := 1:.N, by = player]
+  # dt.baseball.players[n == 5, ]
+
+  # # For those names that appear more than once change name to name-index
+  dt.basketball.players[, player_name := player]
+  dt.baseball.players[, player_name := player]
+  dt.basketball.players$A <- 1
+  dt.basketball.players$A <- NULL
+  dt.baseball.players$A <- 1
+  dt.baseball.players$A <- NULL
+
+  dt.basketball.players[n != 1, player_name := paste0(player_name, "-", index)]
+  dt.baseball.players[n != 1, player_name := paste0(player_name, "-", index)]
+
+  dt.basketball.players$sports <- "basketball"
+  dt.baseball.players$sports <- "baseball"
+
+  dt.players <- rbind(dt.basketball.players[, list(sports, player_name, from, to, active, hall_of_famer)],
+                      dt.baseball.players[, list(sports, player_name, from, to, active, hall_of_famer)])
+
+  col.names <- colnames(dt.input)
+  col.names <- c(col.names, colnames(dt.players))
+  col.names <- unique(col.names)
+  col.names <- col.names[col.names != "player_name"]
+
+  # Use this new name to add HoF to dt.cards
+  dt.input <- merge(dt.input, dt.players,
+                    by.x = c("sports", "V4"),
+                    by.y = c("sports", "player_name"),
+                    all.x = TRUE)
+  setcolorder(dt.input, col.names)
+
+  return(dt.input)
+}
+
+```
+
+```{r getadditionalinfo}
+dt.example.valid.hof <- add.player.info(dt.example.valid)
+head(dt.example.valid.hof)
 ```
 

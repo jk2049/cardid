@@ -9,6 +9,7 @@
 #' @export
 drop.useless.columns <- function(dt.input){
 
+  # Columns that are not needed any longer are dropped
   dt.input$four_digit_year <- NULL
   dt.input$four_digit_year_count <- NULL
   dt.input$two_digit_year <- NULL
@@ -23,10 +24,12 @@ drop.useless.columns <- function(dt.input){
   # Also drop the V columns that are empty
   for(i in 4:11){
     col.player.name <- paste0("V", i)
-    if(sum(is.na(dt.input[, get(col.player.name)])) == nrow(dt.input)){
-      dt.input[, (col.player.name) := NULL]
+    if(col.player.name %in% colnames(dt.input)){
+      if(sum(is.na(dt.input[, get(col.player.name)])) == nrow(dt.input)){
+        dt.input[, (col.player.name) := NULL]
+      }
+      rm(col.player.name)
     }
-    rm(col.player.name)
   }
   return(dt.input)
 }
