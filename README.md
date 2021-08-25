@@ -37,42 +37,73 @@ order as in the below example:
 
 ``` r
 library(cardid)
-## basic example code
+library(dplyr)
+#> Warning: package 'dplyr' was built under R version 4.0.5
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+library(stringr)
+#> Warning: package 'stringr' was built under R version 4.0.3
+library(data.table)
+#> Warning: package 'data.table' was built under R version 4.0.5
+#> 
+#> Attaching package: 'data.table'
+#> The following objects are masked from 'package:dplyr':
+#> 
+#>     between, first, last
+library(plyr)
+#> Warning: package 'plyr' was built under R version 4.0.4
+#> ------------------------------------------------------------------------------
+#> You have loaded plyr after dplyr - this is likely to cause problems.
+#> If you need functions from both plyr and dplyr, please load plyr first, then dplyr:
+#> library(plyr); library(dplyr)
+#> ------------------------------------------------------------------------------
+#> 
+#> Attaching package: 'plyr'
+#> The following objects are masked from 'package:dplyr':
+#> 
+#>     arrange, count, desc, failwith, id, mutate, rename, summarise,
+#>     summarize
 ```
 
 The package offers three datasets. The first is a dataset with
 information about all the player who have played in the MLB:
 
 ``` r
-head(baseball.players)
-#>          player   sports from   to active hall_of_famer original_player
-#> 1 david aardsma baseball 2004 2015      0             0   david aardsma
-#> 2   henry aaron baseball 1954 1976      0             1     henry aaron
-#> 3  tommie aaron baseball 1962 1971      0             0    tommie aaron
-#> 4      don aase baseball 1977 1990      0             0        don aase
-#> 5     andy abad baseball 2001 2006      0             0       andy abad
-#> 6 fernando abad baseball 2010 2019      1             0   fernando abad
+head(dt.baseball.players)
+#>           player from   to active hall_of_famer   sports
+#> 1: david aardsma 2004 2015      0             0 baseball
+#> 2:   henry aaron 1954 1976      0             1 baseball
+#> 3:  tommie aaron 1962 1971      0             0 baseball
+#> 4:      don aase 1977 1990      0             0 baseball
+#> 5:     andy abad 2001 2006      0             0 baseball
+#> 6: fernando abad 2010 2019      1             0 baseball
 ```
 
 The second is a dataset with information about all the player who have
 played in the NBA:
 
 ``` r
-head(basketball.players)
-#>               player     sports from   to active hall_of_famer
-#> 1     alaa abdelnaby basketball 1991 1995      0             0
-#> 2     zaid abdulaziz basketball 1969 1978      0             0
-#> 3 kareem abduljabbar basketball 1970 1989      0             1
-#> 4  mahmoud abdulrauf basketball 1991 2001      0             0
-#> 5   tariq abdulwahad basketball 1998 2003      0             0
-#> 6 shareef abdurrahim basketball 1997 2008      0             0
-#>       original_player
-#> 1      alaa abdelnaby
-#> 2     zaid abdul-aziz
-#> 3 kareem abdul-jabbar
-#> 4  mahmoud abdul-rauf
-#> 5   tariq abdul-wahad
-#> 6 shareef abdur-rahim
+head(dt.basketball.players)
+#>                 player from   to pos   ht  wt        birth_date
+#> 1:      alaa abdelnaby 1991 1995 F-C 6-10 240     June 24, 1968
+#> 2:     zaid abdul-aziz 1969 1978 C-F  6-9 235     April 7, 1946
+#> 3: kareem abdul-jabbar 1970 1989   C  7-2 225    April 16, 1947
+#> 4:  mahmoud abdul-rauf 1991 2001   G  6-1 162     March 9, 1969
+#> 5:   tariq abdul-wahad 1998 2003   F  6-6 223  November 3, 1974
+#> 6: shareef abdur-rahim 1997 2008   F  6-9 225 December 11, 1976
+#>                    colleges active hall_of_famer     sports
+#> 1:                     Duke      0             0 basketball
+#> 2:               Iowa State      0             0 basketball
+#> 3:                     UCLA      0             1 basketball
+#> 4:                      LSU      0             0 basketball
+#> 5: Michigan, San Jose State      0             0 basketball
+#> 6:               California      0             0 basketball
 ```
 
 The third is a subset of a dataset that contains information about
@@ -108,13 +139,17 @@ dt.example.baseball.titles <- dt.example.titles[sports == "Baseball", ]
 dt.example.years <- dt.example[, list(sports, card_title, product_section_year)]
 ```
 
-### Card Title Pre-Processing
+### Player Name Pre-Processing
+
+First, we use the functions ‘’baseball.preprocess’’ and
+‘’baseball.preprocess’’ in order to manipulate the player names of
+the MLB and the NBA players respectively. Standard NLP actions are taken
+(i.e., remove stopwords etc.) that allow us to build a dictionary of
+player names. This is important as the same player names (e.g.,
+shaquille o’neal) can be written in different ways in the card titles
+(e.g., shaquille o’neal, shaquille o neal, shaquille oneal etc.)
 
 ``` r
-dt.example.basketball.titles$card_title <- data.preprocess(dt.example.basketball.titles$card_title)
-dt.example.baseball.titles$card_title <- data.preprocess(dt.example.baseball.titles$card_title)
-dt.example.years$card_title_2 <- data.preprocess(dt.example.years$card_title)
+baseball.players <- baseball.preprocess(dt.baseball.players)
+basketball.players <- basketball.preprocess(dt.basketball.players)
 ```
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.

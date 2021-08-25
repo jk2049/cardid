@@ -16,11 +16,11 @@ remove.duplicate.players <- function(dt.input, sport){
   dt.input <- dt.input[sports == sport, ]
 
   if(sport == "basketball"){
-    all.players <- dt.basketball.players$player
+    all.players <- basketball.players$original_player
     ## Keep duplicate entries
     all.players.duplicates <- all.players[duplicated(all.players)]
   }else if(sport == "baseball"){
-    all.players <- dt.baseball.players$player
+    all.players <- baseball.players$original_player
     ## Keep duplicate entries
     all.players.duplicates <- all.players[duplicated(all.players)]
     all.players.duplicates <- c(all.players.duplicates,
@@ -31,9 +31,6 @@ remove.duplicate.players <- function(dt.input, sport){
   rm(all.players)
 
   i.limit <- as.numeric(max(dt.input$n_players)) + 3
-
-  # all.players.duplicates <- "lamelo ball"
-  # table(dt.input$flag, exclude = NULL)
 
   dt.input$flag <- 0
   dt.input$sports <- tolower(dt.input$sports)
@@ -50,7 +47,7 @@ remove.duplicate.players <- function(dt.input, sport){
   # Some V columns have the same players
   for(i in 1:length(indices)){
 
-    # print(paste0("Loop 1 - ", sport, " ", i, " out of ", length(indices)))
+    print(paste0("Loop 1 - ", sport, " ", i, " out of ", length(indices)))
 
     card.info <- dt.input[indices[i], ]
 
@@ -132,7 +129,7 @@ fix.names <- function(dt.input, sport){
 
     for(i in 1:length(indices)){
 
-      # print(paste0("Loop 2 - sport ", sport, " ", i, " out of ", length(indices)))
+      print(paste0("Loop 2 - sport ", sport, " ", i, " out of ", length(indices)))
 
       card.info <- dt.input[indices[i], ]
 
@@ -239,7 +236,7 @@ player.tie.break <- function(dt.input, sport){
 
   for(i in 1:length(indices)){
 
-    # print(paste0("Loop 3 - ", sport, " player ", i, " out of ", length(indices)))
+    print(paste0("Loop 3 - ", sport, " player ", i, " out of ", length(indices)))
 
     card.info <- dt.input[indices[i], ]
     card.title <- card.info[, card_title_2]
@@ -304,7 +301,6 @@ player.tie.break <- function(dt.input, sport){
   return(dt.input)
 }
 
-
 #' Tags which observations have a valid product id. These are the observations
 #' for which exactly one player has been identified.
 #'
@@ -315,6 +311,7 @@ player.tie.break <- function(dt.input, sport){
 #'
 #' @export
 flag.id.valid <- function(dt.input){
+  # Flag valid
   dt.input[, valid := 0]
   dt.input[n_players == 1 &
              !grepl("-no-fit", V4) & !grepl("-all-fit", V4) & !grepl("-NA", V4) &
