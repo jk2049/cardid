@@ -14,19 +14,12 @@ of a card identifier.
 
 ## Installation
 
-You can install the released version of cardid from
-[CRAN](https://CRAN.R-project.org) with:
+You can install the development version from
+[GitHub](https://github.com/) with:
 
 ``` r
-install.packages("cardid")
-```
-
-And the development version from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
 install.packages("remotes")
-devtools::install_github("jk2049/cardid")
+remotes::install_github("jk2049/cardid")
 ```
 
 ## Example
