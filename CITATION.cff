@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+title: "cardid: Entity Resolution for Sports Trading Card Listings"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - given-names: "Ioannis Filippos"
+    family-names: "Kanellopoulos"
+    email: "i.f.kanellopoulos@tilburguniversity.edu"
+    affiliation: "Tilburg University"
+    orcid: "https://orcid.org/0000-0002-0062-0889"
+repository-code: "https://github.com/jk2049/cardid"
+abstract: >-
+  An R package for resolving unstructured sports trading card listings into
+  structured identifiers. Given the free-text title and product information of a
+  basketball or baseball trading card, cardid identifies the player and the year
+  the card refers to and constructs a standardised card identifier, enabling
+  listings to be matched across marketplaces and over time. The package was
+  developed to build the analysis panel for research on the effect of
+  non-fungible tokens on physical collectibles markets, and is reusable for any
+  setting requiring entity resolution of marketplace listing text.
+keywords:
+  - entity resolution
+  - record linkage
+  - trading cards
+  - collectibles
+  - digital markets
+  - non-fungible tokens
+  - R
+license: MIT
+version: 1.0.0
+date-released: "2026-08-18"
+references:
+  - type: article
+    title: "NFT Disruption in Platform Competition: Evidence from Trading Card Collectibles"
+    authors:
+      - given-names: "Ioannis Filippos"
+        family-names: "Kanellopoulos"
+      - given-names: "Dominik"
+        family-names: "Gutt"
+      - given-names: "Ting"
+        family-names: "Li"
+    journal: "Information Systems Research"
+    year: 2026
+    doi: "10.1287/isre.2024.0829"

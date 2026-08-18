@@ -1,22 +1,29 @@
 Package: cardid
 Title: Use Sports Card Information to Create Card Identifiers
-Version: 0.0.0.9000
-Authors@R: 
-    person(given = "jk2049 - Anonymous due to academic submission",
-           family = "jk2049 - Anonymous due to academic submission",
+Version: 1.0.0
+Authors@R:
+    person(given = "Ioannis Filippos",
+           family = "Kanellopoulos",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: This package allows you to use the information of basketball and 
-    baseball sports trading cards in order to find the (1) player and (2) year
-    that each card refers to. In addition, it allows the creation of a card 
-    identifier.
+           email = "i.f.kanellopoulos@tilburguniversity.edu",
+           comment = c(ORCID = "0000-0002-0062-0889"))
+Description: Tools for resolving unstructured sports trading card listings into
+    structured identifiers. Given the free-text title and product information of
+    a basketball or baseball trading card, the package identifies (1) the player
+    the card refers to and (2) the year of the card, and constructs a
+    standardised card identifier that supports matching listings across
+    marketplaces and over time. Developed to construct the analysis panel for
+    research on the effect of non-fungible tokens on physical collectibles
+    markets, and reusable for any setting requiring entity resolution of
+    marketplace listing text.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
-Imports: 
+URL: https://github.com/jk2049/cardid
+BugReports: https://github.com/jk2049/cardid/issues
+Imports:
     data.table,
     dplyr,
     plyr,
